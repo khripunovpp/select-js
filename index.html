@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <style>
+        .loading,
+        .noresults {
+            display: none;
+        }
+        
+        .e-loading .loading,
+        .e-noresult .noresults {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="search-select">
+        <input type="text" name="query">
+        <input type="hidden" name="result">
+        <p class="loading">Loading</p>
+        <p class="noresults">No results</p>
+        <ul id="results-list"></ul>
+    </div>
+    <script>
+        $(function() {
+            var wrapper = $('.search-select'),
+                query = $('[name=query]'),
+                resultId = $('[name=result]'),
+                loading = $('.loading'),
+                list = $("#results-list");
+
+            query.on('keydown', function(e) {
+                var q = $(e.target).val();
+                checkCity(q, showresults);
+            });
+
+            $('body').on('click', function(e){
+                var target = $(e.target).closest('[data-city-id]');
+                if(target.length === 0) return;
+                setCityId(target.attr('data-city-id'))
+            })
+
+            function setCityId(id) {
+                resultId.val(id || 0)
+            }
+
+            function showresults(r) {
+                var response = JSON.parse(r);
+                var cities = response.suggestions;
+
+                wrapper.removeClass('e-loading');
+                list.html('');
+
+                if (!cities.length) return wrapper.addClass('e-noresult');
+
+                cities.forEach(city => {
+                    list.append($('<li data-city-id="' + city.id + '">' + city.name + '</li>'))
+                });
+            }
+
+            function checkCity(q, cb) {
+
+                list.html('');
+                wrapper.addClass('e-loading');
+
+                var json = {
+                    suggestions: [{
+                        name: "Moscow",
+                        id: 562556
+                    }, {
+                        name: "Monako",
+                        id: 59836
+                    }]
+                }
+                setTimeout(function() {
+                    cb(JSON.stringify(json))
+                }, 2000)
+            }
+        })
+    </script>
+</body>
+
+</html>
